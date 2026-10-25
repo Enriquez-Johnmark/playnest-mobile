@@ -1,62 +1,73 @@
-# PlayNest Android trial
+# PlayNest
 
-PlayNest is a locally persisted Android demo for a parent booking an activity at one fictional activity center. It opens with an explicit demo sign-in for Sarah's sample family; it has no live accounts, payments, shared capacity, staff scanner, or production admission validation.
+PlayNest is an Android app for parents to find and book activities for their children at one fictional activity center. Recommendations, bookings and check-in passes are stored locally on the device.
 
-## Requirements and setup
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/mobile/verification/stitch/home.png" width="240" alt="Home"><br><sub>Home</sub></td>
+    <td align="center"><img src="docs/mobile/verification/stitch/activities.png" width="240" alt="Activities"><br><sub>Activities</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/mobile/verification/stitch/activity-detail.png" width="240" alt="Activity detail"><br><sub>Activity detail</sub></td>
+    <td align="center"><img src="docs/mobile/verification/stitch/bookings.png" width="240" alt="Bookings"><br><sub>Bookings</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/mobile/verification/stitch/check-in-pass.png" width="240" alt="Check-in pass"><br><sub>Check-in pass</sub></td>
+    <td align="center"><img src="docs/mobile/verification/stitch/profile.png" width="240" alt="Profile"><br><sub>Profile</sub></td>
+  </tr>
+</table>
+
+## Requirements
 
 - Node.js and npm
 - Android SDK, Java, and a physical Android device or emulator
-- For a USB device, Android Debug Bridge (`adb`) and USB debugging enabled
+- For a USB device, Android Debug Bridge (`adb`) with USB debugging enabled
 
-Install dependencies with `npm ci`. Start the Metro development server with `npm start`, then build, install, and open the Android debug build with:
+## Setup and run
 
-```bash
-npm run android -- --device V2434
-```
+Install dependencies with `npm ci`, then start the Metro development server with `npm start`.
 
-If several devices are connected, first identify the exact target:
+Build, install and open the Android debug app on a connected device:
 
 ```bash
-adb devices -l
+npm run android -- --device <serial>
 ```
 
-The app package is `com.enriquezwend.playnest`. A local debug APK is written to `android/app/build/outputs/apk/debug/app-debug.apk` after `./android/gradlew app:assembleDebug` succeeds. Install it directly with:
+If several devices are connected, list them first with `adb devices -l`.
+
+The app package is `com.enriquezwend.playnest`. After `./android/gradlew app:assembleDebug` succeeds, the debug APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`. Install it with:
 
 ```bash
 adb -s <serial> install -r android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Debug builds still load JavaScript from Metro; use the `preview` EAS profile when a fully standalone evaluator APK is needed:
+Debug builds load JavaScript from Metro. For a standalone APK that does not need Metro, use the `preview` EAS profile. EAS authentication and signing access is required and is not stored in this repository:
 
 ```bash
 npx eas build --platform android --profile preview
 ```
 
-The configured `preview` profile produces an APK for internal distribution. EAS authentication/signing access is required and is not stored in this repository.
+## Design reference
 
-## Stitch design reference
+The UI is translated from the Stitch designs in `docs/stitch_playnest_mobile_app_design/`. Their HTML, screenshots, images and logo are the visual reference. Screen mapping and verification evidence are in [`docs/mobile/STITCH_PARITY.md`](docs/mobile/STITCH_PARITY.md).
 
-The UI is translated from `docs/stitch_playnest_mobile_app_design/`. Its HTML, screenshots, original images and logo are the visual authority. See [native screen mapping and verification](docs/mobile/STITCH_PARITY.md). Do not replace the source compositions with a simplified interpretation of the earlier product brief.
+## Demo data
 
-## Evaluator demo
+Demo data is fictional: the family, activities, prices and sessions. Availability and bookings are local to each installation and are not shared between devices.
 
-1. Tap **Use Sarah's demo** to populate the local demo credentials, then **Sign in**. On Home, tap **Start with Leo's best fit**. The recommendation is calculated from Leo's age, eligible activities, and local availability.
-2. Review the preselected available session, choose Leo, and tap **Review booking**.
-3. Tap **Confirm booking**. No payment is collected.
-4. Open **View booking**, then open the **check-in pass**.
-5. Force-close and reopen the app. The new booking remains in **Bookings** and becomes the Home highlight.
+To reset a device, open **Profile** → **Reset local demo data** → **Reset demo**. This removes bookings stored on that device and recreates the demo session set.
 
-The clean demo state begins without a reservation. The source catalog uses fictional USD prices and the Leo/Maya family. The existing legacy PHP activities and previously persisted bookings are retained during migration. Reservations still validate eligibility, availability and duplicates before saving.
+## Scope
 
-The pass QR contains only an opaque demo reference. The app does not offer payment, wallet, calendar, notification, membership, waitlist, refund, or rescheduling controls because these services are not connected. Saved reservations are available in Bookings.
+- Demo sign-in only. There is no live authentication, payment, cancellation, membership, notifications, or staff workflow.
+- The check-in pass is presentation-only and is not an admission mechanism.
+- Capacity is not shared or server-authoritative.
 
-## Resetting demo data
+## Verification
 
-Open **Profile** → **Reset local demo data** → **Reset demo**. This confirmation removes bookings stored on that device and creates a fresh, future-facing fictional session set. It does not affect other devices.
-
-## Verification commands
-
-Run all source checks from the project root:
+Run the source checks from the project root:
 
 ```bash
 npm run test:domain
@@ -64,17 +75,3 @@ npx tsc --noEmit
 npm run lint
 node .agents/skills/impeccable/scripts/detect.mjs --json src/app src/components
 ```
-
-## Trial limits
-
-- All people, activity data, bookings, and references are fictional.
-- Availability and bookings are local to one installation; capacity is not shared or server-authoritative.
-- Demo entry is not live authentication; there is no real login, payment, cancellation, membership, push notification, child editing, or live staff workflow.
-- The check-in pass is presentation-only and is not a valid admission mechanism.
-- Android phone delivery is the acceptance target. The deferred website under `docs/web/` is outside this app’s scope.
-
-## Stitch Android preview
-
-The local ARM64 Android preview is `dist/playnest-stitch-preview.apk`. Install it on an ARM64 Android phone, or use `adb install -r dist/playnest-stitch-preview.apk`. It contains its JavaScript bundle and assets and does not require Metro.
-
-Screen mappings, translation decisions and verification evidence are documented in `docs/mobile/STITCH_PARITY.md`.
